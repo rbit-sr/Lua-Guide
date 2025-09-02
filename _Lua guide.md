@@ -84,7 +84,7 @@ Now let's go over two of the most important commands to know about. `get` and `s
 
 The field determines the value to query or modify. 
 
-#### Specifying the target
+### Specifying the target
 
 In order to specify a field, you need to first specify the target object of which you wish to query or modify some value. We already saw `Player` as a possible target, but let's list a couple more possible targets:
 
@@ -106,7 +106,7 @@ You can get a complete list by typing `listTargets`. There may exist multiple ac
 
 If you don't pass any index, it will use `0` by default. You can see how many of a specific type exist by using the command `count [type]`. To get a complete list of all currently existing actors sorted by how close they are to the player, type `locate [type]`.
 
-#### Field accessor path
+### Field accessor path
 
 Next, you need to add a dot-separated path of field accessors. This is similar to pretty much any programming language allowing for some form of (nested) structures or objects. In fact, SpeedRunners was written in an object-oriented programming language and with these field accessors, you are actually accessing the fields of each object as they are represented internally. 
 
@@ -141,7 +141,7 @@ Many actors further contain references to other actors. `Player` for example con
 - `get Player.freezeRay.actor.isCollisionActive`
 - `get Fireball#1.owner.actor.position.x`
 
-#### Array and `List` fields
+### Array and `List` fields
 
 Some fields may be of array or `List` type (functionally, there is no difference between these two). A `FreezeRay` for example is made up of several smaller sprites placed next to each other to form a long ray. It contains a field `sprites` or type `CAnimatedSpriteDrawComponent[]`. You can access individual elements with the usual array access syntax (0-based) by enclosing the index into square brackets `[]`:
 
@@ -153,7 +153,7 @@ You can get the number of elements of an array or `List` using the `count` field
 
 - `get Player.rockets.count`
 
-#### Special fields
+### Special fields
 
 Velo provides a couple of special fields that you can query but are not actually stored by the game. These are always prefixed by an underscore `_`:
 
@@ -167,11 +167,11 @@ Furthermore, there is a proxy target of type `Velo` which provides a couple more
 - `get Velo.delta`
 - `get Velo.screenWidth`
 
-#### 0-based vs 1-based indexing
+### 0-based vs 1-based indexing
 
 As already mentioned, arrays in Lua use 1-based indexing (like our `arg` array). The game SpeedRunners and Velo mod however are written in C#, which uses 0-based indexing. This is why `get` and `set` also make use of 0-based indexing. If a script calls `set("Player#0.boost", 2)` or `get("Player.fireballs[0].isOnGround")`, then this is actually passed to Velo and run as a regular Velo command internally. Lua will have nothing to do with the actual execution.
 
-#### Example scripts
+### Example scripts
 
 With all of this out of the way, let's write a couple of example scripts. Here's a simple implementation of a `move [x] [y]` command, which offsets the player by the specified x- and y-coordinates:
 
@@ -236,7 +236,7 @@ We have already seen how commands like `get` and `set` provide a communication i
 
 We will see the significance of these in the remainder of this document. 
 
-#### Example scripts
+### Example scripts
 
 Let's look at two examples first:
 
@@ -274,7 +274,7 @@ This is where the `onPostUpdate` callback comes in. This callback function gets 
 
 Note that `local` is a keyword that limits the scope of the declared variable to its current block (otherwise it would be global).
 
-#### Lifetime of scripts
+### Lifetime of scripts
 
 Whenever you call a script that does not define any callbacks, it will be executed once (blocking the game's execution as stated earlier) and then be forgotten about (clearing all global variables).
 
@@ -286,7 +286,7 @@ You can stop a script using the `stop [name]` command and restart it using `rest
 
 Sometimes you might want your script react to certain hotkeys or have it write inputs to the player. Let's discuss how this can be achieved.
 
-#### Key inputs
+### Key inputs
 
 In order to detect key inputs, Velo provides the following 4 commands. These commands take in a Windows virtual key code as a parameter and return a boolean that tells the key's current state.
 
@@ -317,7 +317,7 @@ Apart from single keys, these commands can also handle combinations with SHIFT a
 
 Note that when passing single keys, these commands will not react to such key combinations; `isPressed(0x46)` will only detect F being pressed alone, but it does not react to SHIFT+F, CTRL+F or SHIFT+CTRL+F. In order to obtain modifier independent keys, Velo provides the `MOD_ANY` (`0x800`) flag; `isPressed(MOD_ANY | 0x46)` will detect any of F, SHIFT+F, CTRL+F or SHIFT+CTRL+F.
 
-#### Mouse inputs
+### Mouse inputs
 
 For mouse buttons, you can use the same 4 commands as above with the following codes:
 
@@ -327,7 +327,7 @@ You can further query the cursor position by using `get` with the following `Vel
 
 `Velo.mouse.x`, `Velo.mouse.y`
 
-#### Controller inputs
+### Controller inputs
 
 For controller buttons, you can use the same 4 commands as above with the following codes:
 
@@ -337,7 +337,7 @@ For controller buttons, you can use the same 4 commands as above with the follow
 You can further query the controller sticks and triggers by using `get` with the following `Velo` fields:
 - `Velo.leftStick.x`, `Velo.leftStick.y`, `Velo.rightStick.x`, `Velo.rightStick.y`, `Velo.leftTrigger`, `Velo.rightTrigger`
 
-#### Querying and sending player inputs
+### Querying and sending player inputs
 
 Sometimes you might want to know which inputs a player is currently pressing, independent of which layout they are using. For this, `Player` has a couple of bool fields storing each input state that you can query using `get`:
 
@@ -435,7 +435,7 @@ b.x = 5
 -- now a.x is also 5!
 ```
 
-#### Arrays
+### Arrays
 
 Arrays in Lua are just tables with numbers as keys. These numbers range from `1` to the array's length (remember, arrays use 1-based indexing). You can initialize an array like so:
 
@@ -445,7 +445,7 @@ arr[2] -- equals "b"
 #arr -- length of arr, equals 4
 ```
 
-#### `Vector2`
+### `Vector2`
 
 As we have already seen, fields like `Player.actor.position` and `Player.actor.velocity` are of type `Vector2`. They represent a two-dimensional vector (or point) with an x- and y-coordinate. So far, whenever we wanted to get the Player's position or velocity, we needed to call `get` twice in order to retrieve `x` and `y` individually. We can do better however; if you call `get("Player.actor.position")`, it actually returns a table with keys `"x"` and `"y"`. These tables further provide `+`, `-`, `*` and `/` operators that we can use. You can create a new such table using `Vector2:new(x, y)`.
 
@@ -462,7 +462,7 @@ Note that outside Lua, `Vector2` uses the syntax `x,y`:
 
 - `set Player.actor.velocity 1200,-300`
 
-#### `Color`
+### `Color`
 
 Similarly, some commands use colors, for which some utilities are provided. You can create a new color table using `Color:new(r, g, b, a)` which then contains fields `"r"`, `"g"`, `"b"` and `"a"`. Note that these values must range between `0` and `255`. If you don't specify `a`, it defaults to `255`. Operators `+`, `-`, `*` and `/` are provided (multiplying two colors behaves like first converting them to the [0, 1] range, multiplying them component-wise and then converting the result back to the [0, 255] range).
 
@@ -501,7 +501,7 @@ end
 
 On each frame, we increment the `frames` counter and add the elapsed time to `totalElapsed`. Once 1 second has passed, we print the `frames` counter and reset our variables.
 
-#### Recorders and replays
+### Recorders and replays
 
 `Velo` further provides a couple of fields to query the current recorder's or replay's seek position. We will refer to a recorder or replay as a *seekable*:
 
@@ -530,7 +530,7 @@ Note that these only work on replays and TAS-projects. Some of these may freeze 
 
 Velo provides a few commands that allow you to draw simple shapes and text to the screen. Note that these commands need to be called on `onPostDraw()` or any of `onPreDrawLayer(layer)` and `onPostDrawLayer(layer)`. Furthermore, they only draw the specified shape or text for a single frame, meaning that these draw commands need to be called continuously on every frame.
 
-#### Screen coordinates
+### Screen coordinates
 
 Every draw command takes in position values as a `Vector2` with the coordinate system's origin being on the screen's top-left corner and a single unit representing a single pixel.
 
@@ -557,7 +557,7 @@ end
 
 This script just snaps the player to the current cursor position whenever you left click. The field `Velo.mouse` uses screen coordinates while the player uses world coordinates. We can show or hide the cursor using the `enableCursor [enabled]` command. `onStop()` is a callback function that gets called whenever the script get stopped.
 
-#### Rectangles
+### Rectangles
 
 You can draw filled rectangles using `drawRect [position] [size] [color]`. Note that `position` and `size` are of `Vector2` type and `color` of `Color` type. To only draw the rectangle's outline, use `drawRectOutline [position] [size] [thickness] [color]`.
 
@@ -572,7 +572,7 @@ onPostDraw = function()
 end
 ```
 
-#### Lines
+### Lines
 
 You can draw lines similarly using `drawLine [start] [end] [thickness] [color]`. 
 
@@ -593,7 +593,7 @@ end
 
 This time, we transform world coordinates (the player) to screen coordinates.
 
-#### Triangles
+### Triangles
 
 You can draw triangles using `drawTriangles [triangles] [color]` where `triangles` is a `Vector2` array of vertex triplets denoting each triangle's vertices.
 
@@ -648,7 +648,7 @@ onPostDraw = function()
 end
 ```
 
-#### Text
+### Text
 
 In order to draw text, use the `drawText` command. This command has the following signature:
 
@@ -681,7 +681,7 @@ onPostDraw = function()
 end
 ```
 
-#### Layering
+### Layering
 
 When using `onPostDraw()`, everything we draw will always be on top of everything (including Velo's own elements). What if we want something to be drawn behind certain objects, like the tile layer? The game makes use of a layering system in order to ensure a certain draw order; the tile layer belongs to the `"Collision"` layer while the player belongs to the `"LocalPlayersLayer"`, where the latter is drawn after the former, making the player always appear in front every tile.
 
@@ -696,7 +696,7 @@ If you want to draw to a specific layer, you can just use an `if`-check to ensur
 
 We now have all the tools necessary to implement our own little speedometer as a Lua script. Let's go step-by-step through the whole implementation. The full demo is contained in your "scripts" folder.
 
-#### Setting up variables
+### Setting up variables
 
 Let's first set up a couple of global variables that we need:
 
@@ -709,7 +709,7 @@ enabled = true
 
 We want the speedometer to refresh every 0.1 seconds (as determined by `REFRESH_INTERVAL`). For this, we create a timer variable `refreshTimer` and initialize it with `0`. On each refresh, we further store the measured speed into `speed`. Lastly, we want to be able to toggle our speedometer using F3. We create a variable `enabled` for the current toggle state.
 
-#### Handling the toggle
+### Handling the toggle
 
 ```lua
 onPostDraw = function()
@@ -724,7 +724,7 @@ onPostDraw = function()
 
 Next, we create an `onPostDraw()` callback where we want to implement all the logic. We use `isPressed` to check whether F3 was pressed or not. If it was, we toggle the state of `enabled`. If `enabled` is false, we return (skipping the upcoming draw call).
 
-#### Checking if ingame
+### Checking if ingame
 
 ```lua
 if not get("Velo.isIngame") then
@@ -734,7 +734,7 @@ end
 
 We check whether we are currently ingame and return if not. This is to prevent errors from the upcoming `get` calls.
 
-#### Ticking the refresh timer
+### Ticking the refresh timer
 
 ```lua
 refreshTimer = refreshTimer - get("Velo.realDeltaSec")
@@ -746,7 +746,7 @@ end
 
 We tick down the refresh timer by subtracting `Velo.realDeltaSec` which gives us the elapsed time since the last update call. Once our refresh timer goes below `0`, we update our `speed` variable and set the timer back to `REFRESH_INTERVAL`. In order to calculate the player's speed from their velocity, we use the special `_length` field. Alternatively, you can use `Vector2:length(v)` as well.
 
-#### Determining the screen coordinates
+### Determining the screen coordinates
 
 We determine the screen coordinates the following way:
 
@@ -758,7 +758,7 @@ local screenCoords = worldToScreen(position + offset)
 
 We first get the player's position and then transform it from world coordinates to screen coordinates using `worldToScreen`. Additionally, we apply a little offset to make the speedometer appear more centered and above the player. `12.5` is half of the player's hitbox width.
 
-#### Drawing the text
+### Drawing the text
 
 Finally, we draw the speedometer's text to the screen:
 
@@ -1047,7 +1047,7 @@ The current indentation value is preserved through any form of line-breaks. The 
 
 Velo provides a couple of commands that allow you to query runs from the leaderboard. These commands send a new request to the leaderboard server and return a unique request ID. Once the response comes in, Velo will call the `onReceiveRuns(requestId, runs)` callback, where `requestId` is the request ID returned from the command earlier and `runs` is an array of `RunInfo` tables. If the request failed, the `runs` array will be `nil`.
 
-#### `RunInfo` table
+### `RunInfo` table
 
 The `RunInfo` tables contain the following fields:
 
@@ -1075,7 +1075,7 @@ The `RunInfo` tables contain the following fields:
 - `jumps`: Jump count
 - `boostUsed`: Boost used (in percent)
 
-#### Map IDs
+### Map IDs
 
 You can type `listMaps` to get a complete list of all map IDs. You can further use `get Velo.mapId` to get the current map ID. In general however, these map IDs have the following structure:
 
@@ -1084,7 +1084,7 @@ You can type `listMaps` to get a complete list of all map IDs. You can further u
 - RWs and old RWs except: May change from update to update
 - non-curated Workshop: Steam ID (you can see in the map page's URL)
 
-#### Category IDs
+### Category IDs
 
 - `NEW_LAP` (`0`): New lap
 - `ONE_LAP` (`1`): 1 lap
@@ -1094,7 +1094,7 @@ You can type `listMaps` to get a complete list of all map IDs. You can further u
 - `HUNDRED_PERC` (`5`): 100%
 - `EVENT` (`6`): Event
 
-#### Requests
+### Requests
 
 Velo provides the following request commands:
 
@@ -1116,11 +1116,11 @@ Velo provides the following request commands:
     - `count`: Total number of runs to request (max `100`)
 - `requestTASRuns`
 
-#### Downloading recordings
+### Downloading recordings
 
 You can use the `download [id] [name]` command to download and save a recording from the leaderboard. Once a download has finished, you will be notified via the `onDownloadFinished(id, name)` callback.
 
-#### Example
+### Example
 
 The following example requests the top 5 runs of the current map, downloads their recordings and then sets their ghosts:
 
