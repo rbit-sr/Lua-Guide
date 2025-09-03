@@ -4,7 +4,7 @@ This document provides a complete overview of every feature the Velo Lua integra
 
 ## What is the Velo Lua integration?
 
-With update 2.4.0, Velo now supports integration of Lua scripts. *Lua* is a powerful scripting language that is easily embeddable into different systems (like Velo). With its simple procedural syntax, it allows for quick and easy script writing with little code.
+With update 2.4.0, Velo now supports the integration of Lua scripts. *Lua* is a powerful scripting language that is easily embeddable into different systems (like Velo). With its simple procedural syntax, it allows for quick and easy script writing with little code.
 
 These scripts allow you to automate any process that you could otherwise do manually via Velo commands. This includes querying and modifying values of the game's internal state (position, velocity, ...), changing Velo settings, saving and loading savestates, spawning and despawning actors, placing tiles, automating inputs, drawing shapes and text to screen and more. 
 
@@ -26,7 +26,7 @@ What Lua scripts now allow you to do is to add new custom commands that can be r
 
 ## Getting started and Hello World
 
-Let's write a simple Hello World script. Open up the folder "Velo\\scripts" where all scripts need to be located. As you can see, it already contains a couple of demo scripts. Create a new text-file and name it "helloWorld.lua". (It **must** use the ".lua"-extention, it cannot be ".txt". Enable file extentions in your file explorer to see or just copy another script and rename it.)
+Let's write a simple Hello World script. Open up the folder "Velo\\scripts" where all scripts need to be located. As you can see, it already contains a couple of demo scripts. Create a new file and name it "helloWorld.lua". (It **must** use the ".lua"-extention, it cannot be ".txt". Enable file extentions in your file explorer to see or just copy another script and rename it.)
 
 Open up your newly created file with any text-editor, type `echo("Hello World!")` and save. Then, open up your game, open up the console, type `helloWorld` and it should print to your console. Note that you do not need to restart your game when making changes. Just save the script and run it again.
 
@@ -91,8 +91,8 @@ In order to specify a field, you need to first specify the target object of whic
 - `Player`
 - `Grapple`
 - `Rocket`
-- `Obstacle`
-- `DroppedObstacle`
+- `Obstacle` (box built into the map)
+- `DroppedObstacle` (box dropped by player)
 - `Fireball`
 - `SwitchBlock` (gate)
 - `CCamera` (not an actor, but can still be targetted)
@@ -143,7 +143,7 @@ Many actors further contain references to other actors. `Player` for example con
 
 ### Array and `List` fields
 
-Some fields may be of array or `List` type (functionally, there is no difference between these two). A `FreezeRay` for example is made up of several smaller sprites placed next to each other to form a long ray. It contains a field `sprites` or type `CAnimatedSpriteDrawComponent[]`. You can access individual elements with the usual array access syntax (0-based) by enclosing the index into square brackets `[]`:
+Some fields may be of array or `List` type (functionally, there is no difference between these two). A `FreezeRay` for example is made up of several smaller sprites placed next to each other to form a long ray. It contains a field `sprites` of type `CAnimatedSpriteDrawComponent[]`. You can access individual elements with the usual array access syntax (0-based) by enclosing the index into square brackets `[]`:
 
 - `get Player.freezeRay.sprites[3].position.x`
 - `get TriggerSaw#1.hitbox.vertices[2].x` (hitbox is an octagonal shape of type `CConvexPolygon`)
@@ -158,7 +158,7 @@ You can get the number of elements of an array or `List` using the `count` field
 Velo provides a couple of special fields that you can query but are not actually stored by the game. These are always prefixed by an underscore `_`:
 
 - `Vector2`: `_length` or `_a` (float, gets the length of the vector, both do the same)
-- `Player`: `_grappleCooldown`, `_slideCooldown` and `_surfCooldown` (float, note that these three cooldowns are handled a bit differently by the game's code and therefore are not stored directly)
+- `Player`: `_grappleCooldown`, `_slideCooldown` and `_surfCooldown` (float, note that these three cooldowns are handled a bit differently by the game's code and are therefore not stored directly)
 
 Furthermore, there is a proxy target of type `Velo` which provides a couple more fields. Type `listFields Velo` to see them all. A couple examples:
 
@@ -217,19 +217,19 @@ Note that the same could have been achieved way easier using the `despawn` comma
 
 ## Callbacks
 
-We have already seen how commands like `get` and `set` provide a communication interface between Velo and our scripts. These command calls are always initiated by our scripts. Callbacks provide another communication interface, this time however they are called by Velo on specific events. They allow you to define a function that then gets called by Velo on specific events. Let's list them all:
+We have already seen how commands like `get` and `set` provide a communication interface between Velo and our scripts. These command calls are always initiated by our scripts. Callbacks provide another communication interface, this time however they are called by Velo on specific events. They allow you to define a function that is then called by Velo on specific events. Let's list them all:
 
-- `onPreUpdate()`: Gets called right before the game's update method gets called.
+- `onPreUpdate()`: Gets called right before the game's update method is called.
 - `onPostUpdate()`: Gets called right after the game's update method was called.
-- `onPreDraw()`: Gets called right before the game's draw methods were called.
+- `onPreDraw()`: Gets called right before the game's draw methods is called.
 - `onPostDraw()`: Gets called right after the game's draw methods were called.
-- `onPreDrawLayer(layer)`: Gets called right before all objects in layer `layer` get drawn.
+- `onPreDrawLayer(layer)`: Gets called right before all objects in layer `layer` are drawn.
 - `onPostDrawLayer(layer)`: Gets called right after all objects in layer `layer` were drawn.
 - `onPostPresent()`: Gets called right after the GPU finished drawing the next frame.
 - `onSetInputs(playerIndex)`: Gets called right after the player's inputs have been polled.
-- `onPlayerReset(playerIndex)`: Gets called when a player's state gets reset.
+- `onPlayerReset(playerIndex)`: Gets called when a player's state is reset.
 - `onLapFinish(time)`: Gets called when the player finishes a lap.
-- `onEcho(text)`: Gets called when some text gets printed to the console.
+- `onEcho(text)`: Gets called when some text is printed to the console.
 - `onReceiveRuns(requestId, runs)`: Gets called when receiving the response to a runs request.
 - `onDownloadFinish(id, name)`: Gets called when the download of a recording has finished.
 - `onStop()`: Gets called when the script is being stopped or the game exits.
@@ -247,7 +247,7 @@ onLapFinish = function(time)
 end
 ```
 
-This is a simple script that just prints out the final time to the console whenever the player finishes a lap. In order to achieve that, we define a callback function that gets called by Velo whenever the player finishes a lap.
+This is a simple script that just prints out the final time to the console whenever the player finishes a lap. In order to achieve that, we define a callback function that is called by Velo whenever the player finishes a lap.
 
 We can define functions in Lua using the `function(args...) ... end` syntax. We assign a function to a variable called `onLapFinish`, which is a special name that Velo is able to recognize. This function then gets called every time the player has finished a lap, passing the final time to it.
 
@@ -270,7 +270,7 @@ end
 
 This is a script that, when started, allows the player to do reverse grapples to the left (by default, they only work to the right). While not going too deep into the technical details of the game, the main idea here is that we want to increase the `Player.swingRadius` value a little whenever the player starts swinging, triggering the bug the same way it works for reverse grapples to the right. In order to achieve that, we need to continuously check on each frame whether the player is swinging or not, and if they do, change the value.
 
-This is where the `onPostUpdate` callback comes in. This callback function gets called every time right after the game has finished its own update function, which handles all the physics and more. 
+This is where the `onPostUpdate` callback comes in. This callback function is called every time right after the game has finished its own update function, which handles all the physics and more. 
 
 Note that `local` is a keyword that limits the scope of the declared variable to its current block (otherwise it would be global).
 
@@ -346,7 +346,7 @@ Sometimes you might want to know which inputs a player is currently pressing, in
 The following example gives the player a massive speed boost whenever they hold boost, depending on which direction they are currently holding:
 
 ```lua
--- giveBoost.lua
+-- speedBoost.lua
 onPreUpdate = function()
     left = get("Player.leftHeld")
     right = get("Player.rightHeld")
@@ -561,7 +561,7 @@ This script just snaps the player to the current cursor position whenever you le
 
 You can draw filled rectangles using `drawRect [position] [size] [color]`. Note that `position` and `size` are of `Vector2` type and `color` of `Color` type. To only draw the rectangle's outline, use `drawRectOutline [position] [size] [thickness] [color]`.
 
-Here is a simple example that always just draws a small red rectangle on the cursors current position:
+Here is a simple example that always just draws a small red rectangle on the cursor's current position:
 
 ```lua
 -- mouseRect.lua
