@@ -141,6 +141,14 @@ Many actors further contain references to other actors. `Player` for example con
 - `get Player.freezeRay.actor.isCollisionActive`
 - `get Fireball#1.owner.actor.position.x`
 
+Lastly, you are also able to query and modify fields that are of actor types. Here are a few examples:
+
+- `get Rocket#2.target` (could return `Player#1` for example)
+- `set Rocket#2.target Player#1`
+- `set Rocket#2.target null`
+
+Be careful as some of these modifications may crash the game (especially when setting things to `null`).
+
 ### Array and `List` fields
 
 Some fields may be of array or `List` type (functionally, there is no difference between these two). A `FreezeRay` for example is made up of several smaller sprites placed next to each other to form a long ray. It contains a field `sprites` of type `CAnimatedSpriteDrawComponent[]`. You can access individual elements with the usual array access syntax (0-based) by enclosing the index into square brackets `[]`:
