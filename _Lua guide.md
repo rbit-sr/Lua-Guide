@@ -874,6 +874,46 @@ run("lock.add", "Player.actor.velocity", Vector2:new(1200, 0))
 
 Note that Lua also provides a similar `require(name)` function which takes another script and executes it. Doing this however makes the other script run as part of the current script; if we used `require` in the above example instead, it would make all scripts run as part of the "onStart" script, making them all share the same global variables. This especially applies to all the callbacks and subcommands, allowing some scripts to overwrite them over others'. We would further have to call `onStart.add` instead of `lock.add` and they would all appear as `onStart` when calling `listRunning`.
 
+## Return values
+
+Scripts can return values just like any other function. If you invoke a script via the console, it will print the return value. Using this, we can write an alternative version of our Hello World script:
+
+```lua
+-- helloWorldReturn.lua
+return "Hello World!"
+```
+
+Note that `run` will return the invoked script's return value. Let's demonstrate this using an example:
+
+```lua
+-- add.lua
+return arg[1] + arg[2]
+```
+
+```lua
+-- boostSum.lua
+boost1 = get("Player#0.boost")
+boost2 = get("Player#1.boost")
+sum = run("add", boost1, boost2)
+echo(tostring(sum))
+```
+
+When running `boostSum`, it will add the amount of boost of player 1 and player 2 together and print the result. The actual addition operation is done in "add.lua", which we call via `run`, passing the two players' boost values. "add.lua" returns the result via `return`, which then gets passed further down as the return value of `run`.
+
+#### Multiple return values
+
+Lua supports multiple return values:
+
+```lua
+function returnMultiple()
+    return "a", false, 27
+end
+
+a, b, c = returnMultiple()
+```
+
+Velo scripts also support this and a script may return multiple values.
+
 ## Error handling
 
 Some Velo commands can throw an error if run on bad conditions; a lot of commands can only be run when ingame or not in an online match. It is therefore a good idea to guard your scripts via `get("Velo.isIngame")` and `get("Velo.isOnline)` checks.
