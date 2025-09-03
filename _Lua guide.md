@@ -1208,3 +1208,16 @@ On `onReceiveRuns`, we loop through all received runs and use the `download` com
 On `onDownloadFinished`, we use `setGhost [name] [ghostIndex]` to set the ghosts to each recording we downloaded. We further use `prepareGhost` to spawn each ghost in advance. This is not necessary strictly speaking but cuts down on a lot of waiting time; whenever the `setGhost` command is used, Velo needs to ensure the ghost has existed for at least 1 second to prevent crashes. If it didn't yet, Velo will wait and freeze the game.
 
 Once every ghost has been set, we call `exit()` to stop the script.
+
+## Miscellaneous
+
+This final section will just list a couple of miscellaneous and unrelated information that didn't really fit into this guide.
+
+- Even though it was stated that arrays in Lua are 1-based, `arg[0]` actually contains the script's name (which is not really of any use however).
+- By querying `Velo.isPlaybackRunning` and `Velo.playbackType`, you can query whether a playback is currently running and get its type. The different types are:
+    - `-1`: None
+    - `1`: Replay
+    - `2`: Replay exact
+    - `3`: Verify
+    - `4`: Capture
+- You can get a map's name via `getMapName [mapId]` and a player's name via `getPlayerName [steamId]`.
