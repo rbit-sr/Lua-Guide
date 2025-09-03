@@ -1146,6 +1146,8 @@ You can type `listMaps` to get a complete list of all map IDs. You can further u
 
 Velo provides the following request commands:
 
+- `requestRun [id]`
+    - Requests only a single run of ID `id`.
 - `requestWRRuns [type] [place]`
     - `type`: `0`: Velo curated, `1`: Other
     - `place`: 0-based place (`0` is 1st place)
