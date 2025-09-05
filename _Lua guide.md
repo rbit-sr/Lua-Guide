@@ -329,7 +329,7 @@ Note that when passing single keys, these commands will not react to such key co
 
 For mouse buttons, you can use the same 4 commands as above with the following codes:
 
-- `LEFT`, `RIGHT`, `MIDDLE`, `X1`, `X2`
+- `M_LEFT`, `M_RIGHT`, `M_MIDDLE`, `M_X1`, `M_X2`
 
 You can further query the cursor position by using `get` with the following `Velo` fields:
 
@@ -339,8 +339,8 @@ You can further query the cursor position by using `get` with the following `Vel
 
 For controller buttons, you can use the same 4 commands as above with the following codes:
 
-- `A`, `B`, `X`, `Y`, `LEFT_SHOULDER`, `RIGHT_SHOULDER`, `LEFT_STICK`, `RIGHT_STICK`, 
-`START`, `BACK`, `BIG_BUTTON`, `TRIGGER_LEFT`, `TRIGGER_RIGHT`, `DPAD_LEFT`, `DPAD_RIGHT`, `DPAD_UP`, `DPAD_DOWN`
+- `GP_A`, `GP_B`, `GP_X`, `GP_Y`, `GP_LEFT_SHOULDER`, `GP_RIGHT_SHOULDER`, `GP_LEFT_STICK`, `GP_RIGHT_STICK`, 
+`GP_START`, `GP_BACK`, `GP_BIG_BUTTON`, `GP_TRIGGER_LEFT`, `GP_TRIGGER_RIGHT`, `GP_DPAD_LEFT`, `GP_DPAD_RIGHT`, `GP_DPAD_UP`, `GP_DPAD_DOWN`
 
 You can further query the controller sticks and triggers by using `get` with the following `Velo` fields:
 - `Velo.leftStick.x`, `Velo.leftStick.y`, `Velo.rightStick.x`, `Velo.rightStick.y`, `Velo.leftTrigger`, `Velo.rightTrigger`
