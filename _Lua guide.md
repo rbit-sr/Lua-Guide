@@ -1,4 +1,4 @@
-# Lua guide
+# Velo Lua guide
 
 This document provides a complete overview of every feature the Velo Lua integration provides. We will start at the basics and work our way up towards more complex features. While this guide does not expect you to know the language Lua itself, you are required to at least know basic programming concepts like variables, functions, control flow statements (`if else`, `while`, `for`), arrays and tables/dictionaries.
 
@@ -6,11 +6,11 @@ This document provides a complete overview of every feature the Velo Lua integra
 
 With update 2.4.0, Velo now supports the integration of Lua scripts. *Lua* is a powerful scripting language that is easily embeddable into different systems (like Velo). With its simple procedural syntax, it allows for quick and easy script writing with little code.
 
-These scripts allow you to automate any process that you could otherwise do manually via Velo commands. This includes querying and modifying values of the game's internal state (position, velocity, ...), changing Velo settings, saving and loading savestates, spawning and despawning actors, placing tiles, automating inputs, drawing shapes and text to screen and more. 
+These scripts allow you to automate any process that you could otherwise achieve manually via Velo commands. This includes querying and modifying values of the game's internal state (position, velocity, ...), changing Velo settings, saving and loading savestates, spawning and despawning actors, placing tiles, automating inputs, drawing shapes and text to screen and more. 
 
-Note that these scripts cannot be used for cheating and trying to call any command that needs to modify the game's current state will throw an error when in online multiplayer.
+Note that these scripts cannot be used for cheating and any attempt to call a command that needs to modify the game's current state will throw an error when done in online multiplayer.
 
-If you want to know more about Velo and how to install, please read the contained `_README.txt` file. For a deeper guide of the Lua language itself, refer to the [official guide](https://www.lua.org/pil/1.html).
+If you want to know more about Velo and how to install, please read the contained "_README.txt" file. For a deeper guide of the Lua language itself, refer to the [official guide](https://www.lua.org/pil/1.html).
 
 ## Velo's command system
 
@@ -39,13 +39,13 @@ Next, note that `echo` is just another console command and we could just as well
 
 You can see the Lua function signature of a command by typing `help [command]`. If you type `help echo` for example, you should see it being `void(string)`.
 
-Lastly, please note that these scripts are blocking the game's execution. If a script takes 1 second to execute, then it will also freeze the game for 1 second. This is not a problem however and we will soon see how to utilize callbacks to prevent any problems.
+Lastly, please note that these scripts are blocking the game's execution. If a script takes 1 second to execute, then it will also freeze the game for 1 second. This is not a problem however and we will soon see how to utilize callbacks and coroutines to prevent any problems.
 
 ## Passing parameters
 
 As you might have noticed, most commands take some number of parameters while our `helloWorld` script took none as it didn't require any. Let's expand our script a little by adding an extra paramater to determine how many times `Hello World!` should be printed.
 
-If you just type `helloWorld 3`, then it actually does pass an extra `3` parameter to our script. It just doesn't read or make use of it. All parameters are stored in an `arg` array, which you can access with the usual array-access syntax `arg[1]`, `arg[2]`, ... . Note that Lua arrays use 1-based indexing. In order to pass parameters to a script, just put them after the script name as a space-separated list. Note that even though we are in the console, the parameters we pass use Lua syntax, meaning that in order to pass a string, you have to enclose it with quotes.
+If you just type `helloWorld 3`, then it actually does pass an extra `3` parameter to our script. It just doesn't read or make use of it. All parameters are stored in an `arg` array, which you can access with the usual array-access syntax `arg[1]`, `arg[2]`, ... . Note that Lua arrays use 1-based indexing. In order to pass parameters to a script, just put them after the script name as a space-separated list. Note further that even though we are in the console, the parameters we pass use Lua syntax, meaning that in order to pass a string, you have to enclose it with quotes.
 
 We can make Lua execute a certain chunk of code multiple times by enclosing it in a `for i = first, last do ... end` construct. In our example, it looks the following:
 ```lua
@@ -73,7 +73,7 @@ y = x + 43.5
 y = "Hello!"
 ```
 
-Note that variables can also mutate their type and you can assign a string to a variable that was a number before just fine.
+Note that variables can mutate their type and you are allowed to assign a string to a variable that was a number before.
 
 ## `get` and `set`
 
@@ -147,7 +147,7 @@ Lastly, you are also able to query and modify fields that are of actor types. He
 - `set Rocket#2.target Player#1`
 - `set Rocket#2.target null`
 
-Be careful as some of these modifications may crash the game (especially when setting things to `null`).
+Be careful as some of these modifications may crash the game (especially when setting fields to `null`).
 
 ### Array and `List` fields
 
@@ -223,26 +223,27 @@ We first get the count of all obstacles and then iterate through every possible 
 
 Note that the same could have been achieved way easier using the `despawn` command we haven't seen yet. This method however has the advantage that we could write another script that makes each obstacle reappear again.
 
-## Callbacks
+## Events and callbacks
 
-We have already seen how commands like `get` and `set` provide a communication interface between Velo and our scripts. These command calls are always initiated by our scripts. Callbacks provide another communication interface, this time however they are called by Velo on specific events. They allow you to define a function that is then called by Velo on specific events. Let's list them all:
+We have already seen how commands like `get` and `set` provide a communication interface between Velo and our scripts. These command calls are always initiated by our scripts. Callback functions provide another communication interface, this time however they are called by Velo on specific events.
 
-- `onPreUpdate()`: Gets called right before the game's update method is called.
-- `onPostUpdate()`: Gets called right after the game's update method was called.
-- `onPreDraw()`: Gets called right before the game's draw methods is called.
-- `onPostDraw()`: Gets called right after the game's draw methods were called.
-- `onPreDrawLayer(layer)`: Gets called right before all objects in layer `layer` are drawn.
-- `onPostDrawLayer(layer)`: Gets called right after all objects in layer `layer` were drawn.
-- `onPostPresent()`: Gets called right after the GPU finished drawing the next frame.
-- `onSetInputs(playerIndex)`: Gets called right after the player's inputs have been polled.
-- `onPlayerReset(playerIndex)`: Gets called when a player's state is reset.
-- `onLapFinish(time)`: Gets called when the player finishes a lap.
-- `onEcho(text)`: Gets called when some text is printed to the console.
-- `onReceiveRuns(requestId, runs)`: Gets called when receiving the response to a runs request.
-- `onDownloadFinish(id, name)`: Gets called when the download of a recording has finished.
-- `onStop()`: Gets called when the script is being stopped or the game exits.
+Let's list a few example events:
 
-We will see the significance of these in the remainder of this document. 
+- `lapFinish -> time`: Gets fired when the player finishes a lap.
+- `stop`: Gets fired when the script is being stopped or the game exits.
+- `preUpdate`: Gets fired right before the game's update function is called.
+- `postUpdate`: Gets fired right after the game's update function is called.
+
+You can get a complete list by typing `listEvents`.
+
+Now in order to handle such an event, you need to define a callback function. You can do so by defining a global function and naming it by taking the event's name, capitalizing its first letter and prefixing it with `on`. Some events may carry extra parameters, like `lapFinish` carrying the final time for example. You can just take these as function parameters and they will be passed to your callback.
+
+The above 4 examples would require the following callback functions:
+
+- `onLapFinish(time)`
+- `onStop()`
+- `onPreUpdate()`
+- `onPostUpdate()`
 
 ### Example scripts
 
@@ -255,9 +256,9 @@ onLapFinish = function(time)
 end
 ```
 
-This is a simple script that just prints out the final time to the console whenever the player finishes a lap. In order to achieve that, we define a callback function that is called by Velo whenever the player finishes a lap.
+This is a simple script that just prints out the final time to the console whenever the player finishes a lap. In order to achieve that, we define a callback function that is called whenever the `lapFinish` event is fired.
 
-We can define functions in Lua using the `function(args...) ... end` syntax. We assign a function to a variable called `onLapFinish`, which is a special name that Velo is able to recognize. This function then gets called every time the player has finished a lap, passing the final time to it.
+We can create functions in Lua using the `function(args...) ... end` syntax. We assign a function to a variable called `onLapFinish`, which is a special name that Velo is able to recognize and associate with the `lapFinish` event. This function is then called every time the player finishes a lap, passing the final time to it.
 
 ```lua
 -- rightRG.lua
@@ -276,7 +277,7 @@ onPostUpdate = function()
 end
 ```
 
-This is a script that, when started, allows the player to do reverse grapples to the left (by default, they only work to the right). While not going too deep into the technical details of the game, the main idea here is that we want to increase the `Player.swingRadius` value a little whenever the player starts swinging, triggering the bug the same way it works for reverse grapples to the right. In order to achieve that, we need to continuously check on each frame whether the player is swinging or not, and if they do, change the value.
+This is a script that, when started, allows the player to do right reverse grapples (by default, they only work when shooting to the left). While not going too deep into the technical details of the game, the main idea here is that we want to increase the `Player.swingRadius` value a little whenever the player starts swinging, triggering the bug the same way it works for left reverse grapples. In order to achieve that, we need to continuously check on each frame whether the player is currently swinging or not, and if they are, change the value.
 
 This is where the `onPostUpdate` callback comes in. This callback function is called every time right after the game has finished its own update function, which handles all the physics and more. 
 
@@ -286,9 +287,9 @@ Note that `local` is a keyword that limits the scope of the declared variable to
 
 Whenever you call a script that does not define any callbacks, it will be executed once (blocking the game's execution as stated earlier) and then be forgotten about (clearing all global variables).
 
-If your script registers a callback function however, its state will be kept alive after finishing its initial execution, remembering all the global variables. The game continues its execution and then, whenever the callback function's event occurs, it will go back to that script and run the callback (with the stored state). Note that callback function calls are blocking, too.
+If your script registers a callback function however, its state will be kept alive after finishing its initial execution, remembering all the global variables. The game continues its execution and then, whenever the callback function's event is fired, it will go back to that script and run the callback (with the stored state). Note that callback function calls are blocking, too.
 
-You can stop a script using the `stop [name]` command and restart it using `restart [name]`, which will pass the same initial parameters to the script again. Furthermore, you can call `exit()` inside a script to stop it (do not use `stop`!). Note that `exit()` will not immediately exit the script but only on the next update. You may imagine it being more of a "request stop" function. You can get a list of all currently running scripts via `listRunning`.
+You can stop a script using the `stop [name]` command and restart it using `restart [name]`, which will pass the same initial parameters to the script again. Furthermore, you can call `exit()` inside a script to stop it (do not use `stop` on itself!). Note that `exit()` will not immediately exit the script but only on the next update. You may imagine it being more of a "request stop" function. You can get a list of all currently running scripts via `listRunning`.
 
 ## Inputs
 
@@ -372,7 +373,9 @@ onPreUpdate = function()
 end
 ```
 
-In order to send inputs, you can use the same fields but with `set` instead. We need to be a bit more careful however; if we set inputs on `onPreUpdate()`, they will immediately be overwritten by the game's input polling on the next update, and if we set inputs on `onPostUpdate()`, they will also be ignored because all the updates have already been done. In order to solve this problem, Velo provides the `onSetInputs(playerIndex)` callback, which gets called right after the player's inputs have been polled but before all the player's physics updates are being done.
+In order to send inputs, you can use the same fields but with `set` instead. We need to be a bit more careful however; if we set inputs on `onPreUpdate()`, they will immediately be overwritten by the game's input polling on the next update, and if we set inputs on `onPostUpdate()`, they will also be ignored because all the updates have already been done. 
+
+In order to solve this problem, Velo provides the `setInputs -> playerIndex` event, which gets fired right after the player's inputs have been polled but before all the player's physics updates are being done.
 
 Here is an example script that automates spam grappling whenever V is held:
 
@@ -536,7 +539,7 @@ Note that these only work on replays and TAS-projects. Some of these may freeze 
 
 ## Drawing
 
-Velo provides a few commands that allow you to draw simple shapes and text to the screen. Note that these commands need to be called on `onPostDraw()` or any of `onPreDrawLayer(layer)` and `onPostDrawLayer(layer)`. Furthermore, they only draw the specified shape or text for a single frame, meaning that these draw commands need to be called continuously on every frame.
+Velo provides a few commands that allow you to draw simple shapes and text to the screen. Note that these commands need to be called on `onPostDraw()` in order to take any effect. The event `postDraw` is fired right after all the game's draw functions were called. Furthermore, they only draw the specified shape or text for a single frame, meaning that these draw commands need to be called continuously on every frame.
 
 ### Screen coordinates
 
@@ -551,7 +554,7 @@ For these transformations, Velo provides `worldToScreen [position]` and `screenT
 enableCursor(true)
 
 onPostUpdate = function()
-    if isPressed(LEFT) then
+    if isPressed(M_LEFT) then
         mouse = get("Velo.mouse")
         position = screenToWorld(mouse)
         set("Player.actor.position", position)
@@ -563,7 +566,7 @@ onStop = function()
 end
 ```
 
-This script just snaps the player to the current cursor position whenever you left click. The field `Velo.mouse` uses screen coordinates while the player uses world coordinates. We can show or hide the cursor using the `enableCursor [enabled]` command. `onStop()` is a callback function that gets called whenever the script get stopped.
+This script just snaps the player to the current cursor position whenever you left click. The field `Velo.mouse` uses screen coordinates while the player uses world coordinates. We can show or hide the cursor using the `enableCursor [enabled]` command. `onStop()` is a callback function that gets called whenever the script gets stopped.
 
 ### Rectangles
 
@@ -691,14 +694,14 @@ end
 
 ### Layering
 
-When using `onPostDraw()`, everything we draw will always be on top of everything (including Velo's own elements). What if we want something to be drawn behind certain objects, like the tile layer? The game makes use of a layering system in order to ensure a certain draw order; the tile layer belongs to the `"Collision"` layer while the player belongs to the `"LocalPlayersLayer"`, where the latter is drawn after the former, making the player always appear in front every tile.
+When using `onPostDraw()`, everything we draw will always be on top of everything (including Velo's own elements). What if we want something to be drawn behind certain objects, like the tile layer? The game utilizes a layering system in order to ensure a certain draw order; the tile layer belongs to the `"Collision"` layer while the player belongs to the `"LocalPlayersLayer"`, where the latter is drawn after the former, making the player always appear in front every tile.
 
-In order to make use of these layers ourself, Velo provides the `onPreDrawLayer(layer)` and `onPostDrawLayer(layer)` callbacks, which are called before and after each layer is drawn. `layer` is a string determining the layer's ID.
+In order to use these layers ourself, Velo provides the `preDrawLayer -> layer` and `postDrawLayer -> layer` events, which are fired before and after each layer is drawn. `layer` is a string determining the layer's ID.
 
 Here is a list of all the layer IDs in order:
 `"DefaultUILayer"`, `"VersionNumberLayer"`, `"PopupLayer"`, `"TopUILayer"`, `"UserUILayer"`, `"CursorUILayer"`, `"BackgroundLayer0"`, `"BackgroundLayer1"`, `"BackgroundLayer2"`, `"BackgroundLayer3"`, `"BackgroundLayer4"`, `"BackgroundLayer5"`, `"NonParallaxingBackLayer"`, `"ParallaxLayer: 0.800"`, `"ParallaxLayer: 0.825"`, `"ParallaxLayer: 0.850"`, `"ParallaxLayer: 0.875"`, `"ParallaxLayer: 0.900"`, `"ParallaxLayer: 0.925"`, `"ParallaxLayer: 0.950"`, `"ParallaxLayer: 0.975"`, `"BackObjectLayer"`, `"Background 0"`, `"Background 1"`, `"MiddleObjectLayer"`, `"Shading"`, `"Overlay"`, `"GameplayObjectsLayer"`, `"Collision"`, `"ObjectLayer"`, `"TrailBehindRemotePlayersLayer"`, `"RemotePlayersLayer"`, `"TrailInFrontOfRemotePlayersLayer"`, `"TrailBehindLocalPlayersLayer"`, `"LocalPlayersLayer"`, `"TrailInFrontOfLocalPlayersLayer"`, `"tilePreview"`, `"temp"`
 
-If you want to draw to a specific layer, you can just use an `if`-check to ensure the current layer `layer` is the correct one.
+If you want to draw to a specific layer, you can just use an `if`-check in the callback to ensure the current layer `layer` is the correct one.
 
 ## Demo: Implementing a simple speedometer
 
@@ -954,6 +957,88 @@ end
 
 If you don't care about the error message, you can simply do `if pcall(...) then ... end` or `if not pcall(...) then ... end`.
 
+## Reading console input
+
+In some cases, you might want to prompt the user to input some line of text into the console. Let's say for example you want to write a simple calculator script where you first prompt the user to input some number `x`, then prompt the user to enter `y` and finally it will print the result of `x + y`. The following implementation might seem a bit too complex for such a simple example and it indeed is, but bare with it for now. It serves as a motivation for the upcoming section about coroutines and `await`, which allow us to make this implementation way simpler.
+
+In order to prompt the user to input a line into the console, we have the `readLine` command. Note that we really cannot have `readLine` be blocking as that would just lead to the game being completely frozen. So instead, it returns a request ID and our script continues running. Once the user has entered some line of text, the event `lineEntered -> requestId, text` will be fired, giving you the corresponding request ID and the entered text. You can listen to this event via `onLineEntered(requestId, text)`. Note that once we call `readLine`, anything the user now enters into the console will not be treated as a command but instead be fired as an event.
+
+Here is how the calculator script may be implemented:
+
+```lua
+-- calculator.lua
+echo("x = ?")
+xRequest = readLine()
+
+onLineEntered = function(requestId, text)
+    if requestId == xRequest then
+        x = tonumber(text)
+        echo("y = ?")
+        yRequest = readLine()
+    end
+
+    if requestId == yRequest then
+        y = tonumber(text)
+        echo("x + y = " .. tostring(x + y))
+        exit()
+    end
+end
+```
+
+We do an initial `readLine()` call to prompt the user to enter `x` into the console. We then define an `onLineEntered` callback function which checks whether the current request ID corresponds to the `readLine()` call for reading `x` or for reading `y`. If it was the `x`-request, we store `x` and prompt the user to enter `y`. If it was the `y`-request, we print the sum to the console and exit our script.
+
+## Coroutines and `await`
+
+If you want a deeper understanding of what coroutines actually are, please refer to the [official guide](https://www.lua.org/pil/9.1.html). Here, we will only discuss what they are useful for and how `await` works.
+
+First of all, let's see how the above calculator example can be reimplemented using coroutines:
+
+```lua
+-- calculatorCo.lua
+echo("x = ?")
+x = await(readLine())
+
+echo("y = ?")
+y = await(readLine())
+
+echo("x + y = " .. tostring(x + y))
+```
+
+As you can see, this code is way clearer and easier to understand. But how is this working and why isn't it blocking?
+
+The `await` function has two usages. You can either pass some event ID and it will return whenever the event is next fired:
+
+```lua
+time = await("lapFinish") -- waits here until a lap is finished
+echo("Final time: " .. tostring(time))
+```
+
+Or you can pass a request ID of some request command (like `readLine`) and it will return whenever the request finished, like in the calculator example.
+
+When calling `await`, Velo will store the script's current state and temporarily suspend its execution, giving back the control flow to the game. Then, whenever the event that is being awaited occurs, Velo will load the stored state and resume the script's execution, making it continue whereever `await` was called.
+
+So in some sense, `await` is indeed blocking, but it's only blocking the script's execution while still allowing the game to continue running.
+
+Note that you cannot use `await` in the `onStop()` callback. If you await in any other callback (like `onPreUpdate()` for example) and the event is fired while awaiting, the callback will not be called.
+
+Please note further that (currently) you cannot use `run` on a script that both returns some value and uses `await`. The `run` function will return on the next `await`, returning nothing.
+
+## Waiting
+
+Sometimes you might want the script to wait for a specified amount of time. For this, we can use the `wait [seconds]` command. This is another request command that is best being used in combination with `await`. It does not block the game's execution.
+
+Here is a simple example of a countdown:
+
+```lua
+echo("3")
+await(wait(1))
+echo("2")
+await(wait(1))
+echo("1")
+await(wait(1))
+echo("Go!")
+```
+
 ## Querying and modifying Velo settings
 
 Similar to `get` and `set`, there are also `getSt [setting]` and `setSt [setting] [value]` which allow you to query and modify Velo settings. Instead of having to specify a target and field path, you instead need to specify a module and setting path. The module can be `Appearance` or `Offline Game Mods` for example. The setting path is then determined by the nesting structure, where we have to separate each path element using a dot like with `get` and `set`. Note that you may use underscores `_` instead of spaces.
@@ -1093,7 +1178,7 @@ The current indentation value is preserved through any form of line-breaks. The 
 
 ## Querying the leaderboard
 
-Velo provides a couple of commands that allow you to query runs from the leaderboard. These commands send a new request to the leaderboard server and return a unique request ID. Once the response comes in, Velo will call the `onReceiveRuns(requestId, runs)` callback, where `requestId` is the request ID returned from the command earlier and `runs` is an array of `RunInfo` tables. If the request failed, the `runs` array will be `nil`.
+Velo provides a couple of request commands that allow you to query runs from the leaderboard. Just as with `readLine` and `wait`, these commands are best used in combination with `await`. They send a new request to the leaderboard server and once the response comes in, will return an array of `RunInfo` tables. If the request failed, it will be `nil`.
 
 ### `RunInfo` table
 
@@ -1168,7 +1253,7 @@ Velo provides the following request commands:
 
 ### Downloading recordings
 
-You can use the `download [id] [name]` command to download and save a recording from the leaderboard. Once a download has finished, you will be notified via the `onDownloadFinished(id, name)` callback.
+You can use the `download [id] [name]` command to download and save a recording from the leaderboard. You can use `await` on this one too and it will return the run's ID and file name, or listen to the `downloadFinished -> requestId, id, name` event.
 
 ### Example
 
@@ -1177,39 +1262,33 @@ The following example requests the top 5 runs of the current map, downloads thei
 ```lua
 -- setGhosts.lua
 COUNT = 5
-mapId = get("Velo.mapId")
-requestId = requestMapCategoryRuns(mapId, NEW_LAP, 0, 0, COUNT)
 
 for i = 0, COUNT - 1 do
-    prepareGhost(i)
+    prepareGhost(i, i % 4)
 end
 
-onReceiveRuns = function(requestId_, runs)
-    if requestId_ == requestId then
-        for i, run in ipairs(runs) do
-            download(run.id, "_temp" .. tostring(i))
-        end
-    end
+mapId = get("Velo.mapId")
+runs = await(requestMapCategoryRuns(mapId, NEW_LAP, 0, 0, COUNT))
+
+requests = {}
+
+for i, run in ipairs(runs) do
+    requests[i] = download(run.id, "_temp" .. tostring(i))
 end
 
 nextGhostIndex = 0
 
-onDownloadFinished = function(id, name)
+for i, requestId in ipairs(requests) do
+    id, name = await(requestId)
     setGhost(name, nextGhostIndex)
     deleteRec(name)
     nextGhostIndex = nextGhostIndex + 1
-
-    if nextGhostIndex == COUNT then
-        exit()
-    end
 end
 ```
 
-On `onReceiveRuns`, we loop through all received runs and use the `download` command to request the recordings for each of them. Note that the construct `for i, elem in ipairs(arr) do ... end` will iterate through an `arr`, where `elem` is each element and `i` the corresponding index. 
+Note that instead of directly awaiting each download request, we first send all requests and store each request ID in an array. After that, we loop through that array and await each request. This has the advantage that we can download each run simultaneously instead of having to wait for each one before sending the next request. The construct `for i, elem in ipairs(arr) do ... end` will iterate through an array `arr`, where `elem` is each element and `i` the corresponding index. 
 
-On `onDownloadFinished`, we use `setGhost [name] [ghostIndex]` to set the ghosts to each recording we downloaded. We further use `prepareGhost` to spawn each ghost in advance. This is not necessary strictly speaking but cuts down on a lot of waiting time; whenever the `setGhost` command is used, Velo needs to ensure the ghost has existed for at least 1 second to prevent crashes. If it didn't yet, Velo will wait and freeze the game.
-
-Once every ghost has been set, we call `exit()` to stop the script.
+We use `setGhost [name] [ghostIndex]` to set the ghosts to each recording we downloaded. We further use `prepareGhost [ghostIndex] [color]` to spawn each ghost in advance. This is not necessary strictly speaking but cuts down on a lot of waiting time; whenever the `setGhost` command is used, Velo needs to ensure the ghost has existed for at least 1 second to prevent crashes. If it didn't yet, Velo will wait and freeze the game.
 
 ## Miscellaneous
 
@@ -1223,3 +1302,4 @@ This final section will just list a couple of miscellaneous and unrelated inform
     - `3`: Verify
     - `4`: Capture
 - You can get a map's name via `getMapName [mapId]` and a player's name via `getPlayerName [steamId]`.
+- Whenever a script calls `exit()`, it will be stopped on the next return or await, no matter if it's in the main execution or in a callback.
