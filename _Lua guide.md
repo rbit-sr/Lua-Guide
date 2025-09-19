@@ -696,10 +696,10 @@ end
 
 When using `onPostDraw()`, everything we draw will always be on top of everything (including Velo's own elements). What if we want something to be drawn behind certain objects, like the tile layer? The game utilizes a layering system in order to ensure a certain draw order; the tile layer belongs to the `"Collision"` layer while the player belongs to the `"LocalPlayersLayer"`, where the latter is drawn after the former, making the player always appear in front every tile.
 
-In order to use these layers ourself, Velo provides the `preDrawLayer -> layer` and `postDrawLayer -> layer` events, which are fired before and after each layer is drawn. `layer` is a string determining the layer's ID.
+In order to use these layers ourself, Velo provides the `postDrawLayer -> layer` event, which is fired after each layer is drawn. `layer` is a string determining the layer's ID.
 
-Here is a list of all the layer IDs in order:
-`"DefaultUILayer"`, `"VersionNumberLayer"`, `"PopupLayer"`, `"TopUILayer"`, `"UserUILayer"`, `"CursorUILayer"`, `"BackgroundLayer0"`, `"BackgroundLayer1"`, `"BackgroundLayer2"`, `"BackgroundLayer3"`, `"BackgroundLayer4"`, `"BackgroundLayer5"`, `"NonParallaxingBackLayer"`, `"ParallaxLayer: 0.800"`, `"ParallaxLayer: 0.825"`, `"ParallaxLayer: 0.850"`, `"ParallaxLayer: 0.875"`, `"ParallaxLayer: 0.900"`, `"ParallaxLayer: 0.925"`, `"ParallaxLayer: 0.950"`, `"ParallaxLayer: 0.975"`, `"BackObjectLayer"`, `"Background 0"`, `"Background 1"`, `"MiddleObjectLayer"`, `"Shading"`, `"Overlay"`, `"GameplayObjectsLayer"`, `"Collision"`, `"ObjectLayer"`, `"TrailBehindRemotePlayersLayer"`, `"RemotePlayersLayer"`, `"TrailInFrontOfRemotePlayersLayer"`, `"TrailBehindLocalPlayersLayer"`, `"LocalPlayersLayer"`, `"TrailInFrontOfLocalPlayersLayer"`, `"tilePreview"`, `"temp"`
+Here is a list of all available layer IDs in order:
+`"BackgroundLayer0"`, `"NonParallaxingBackLayer"`, `"BackObjectLayer"`, `"Background 0"`, `"Background 1"`, `"MiddleObjectLayer"`, `"Shading"`, `"GameplayObjectsLayer"`, `"Collision"`, `"ObjectLayer"`, `"TrailBehindRemotePlayersLayer"`, `"RemotePlayersLayer"`, `"TrailInFrontOfRemotePlayersLayer"`, `"TrailBehindLocalPlayersLayer"`, `"LocalPlayersLayer"`, `"TrailInFrontOfLocalPlayersLayer"`
 
 If you want to draw to a specific layer, you can just use an `if`-check in the callback to ensure the current layer `layer` is the correct one.
 
