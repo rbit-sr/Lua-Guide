@@ -166,6 +166,7 @@ You can get the number of elements of an array or `List` using the `count` field
 Velo provides a couple of special fields that you can query but are not actually stored by the game. These are always prefixed by an underscore `_`:
 
 - `Vector2`: `_length` or `_a` (float, gets the length of the vector, both do the same)
+- `CActor`: `_acceleration` and `_measuredVelocity` (`Vector2`, measured from current and previous velocity and position values)
 - `Player`: `_grappleCooldown`, `_slideCooldown` and `_surfCooldown` (float, note that these three cooldowns are handled a bit differently by the game's code and are therefore not stored directly)
 
 Furthermore, there is a proxy target of type `Velo` which provides a couple more fields. Type `listFields Velo` to see them all. A couple examples:
@@ -1214,7 +1215,7 @@ You can type `listMaps` to get a complete list of all map IDs. You can further u
 
 - Officials: `0` - `16` in chronological order (`0` is "Metro", `16` is "Laboratory")
 - Origins: `55` - `84` in chronological order (`55` is "Prologue", `83` is "Final Challenge", `84` is "Unused")
-- RWs and old RWs except: May change from update to update
+- RWs and old RWs: May change from update to update
 - non-curated Workshop: Steam ID (you can see in the map page's URL)
 
 ### Category IDs
