@@ -1129,7 +1129,7 @@ Using `getTile [x] [y]` we can get the tile ID at some position and using `setTi
  - `14`: checkered ceiling slope, lower tip on the right
  - `15`: checkered ceiling slope, lower tip on the left
 
-To get the width and height of the current tile map, query `Velo.tileWidth` and `Velo.tileHeight`. The top-leftmost tile is placed at `0`, `0`.
+To get the width and height of the current tile map, query `Velo.tileMapWidth` and `Velo.tileMapHeight`. The top-leftmost tile is placed at `0`, `0`.
  
 Please note that the tile map's coordinate system uses different units than actors, as each tile is made up of 16 "pixels". If we refer to what the tile map uses as *tile coordinates* and what the actors use as *world coordinates*, we can transform tile to world coordinates by multiplying `x` and `y` by `16` and world to tile coordinates by dividing by `16` and truncating the fractional part. You can use the helper functions `tileToWorld(position)` and `worldToTile(position)` for this.
 
