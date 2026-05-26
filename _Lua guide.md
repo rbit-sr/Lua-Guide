@@ -351,16 +351,16 @@ You can further query the controller sticks and triggers by using `get` with the
 
 Sometimes you might want to know which inputs a player is currently pressing, independent of which layout they are using. For this, `Player` has a couple of bool fields storing each input state that you can query using `get`:
 
-`Player.leftHeld`, `Player.rightHeld`, `Player.jumpHeld`, `Player.grappleHeld`, `Player.slideHeld`, `Player.boostHeld`, `Player.itemHeld`
+`Player.isLeftHeld`, `Player.isRightHeld`, `Player.isJumpHeld`, `Player.isGrappleHeld`, `Player.isSlideHeld`, `Player.isBoostHeld`, `Player.isItemHeld`
 
 The following example gives the player a massive speed boost whenever they hold boost, depending on which direction they are currently holding:
 
 ```lua
 -- speedBoost.lua
 onPreUpdate = function()
-    left = get("Player.leftHeld")
-    right = get("Player.rightHeld")
-    boost = get("Player.boostHeld")
+    left = get("Player.isLeftHeld")
+    right = get("Player.isRightHeld")
+    boost = get("Player.isBoostHeld")
 
     if not boost or left == right then
         return
@@ -403,8 +403,8 @@ onSetInputs = function(playerIndex)
         holdGrapple = false -- release on reaching 90 degrees
     end
 
-    set("Player.grappleHeld", holdGrapple)
-    set("Player.jumpHeld", holdJump)
+    set("Player.isGrappleHeld", holdGrapple)
+    set("Player.isJumpHeld", holdJump)
 end
 ```
 
