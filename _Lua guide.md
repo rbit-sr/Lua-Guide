@@ -1,3 +1,5 @@
+[Click here to read on GitHub](https://github.com/rbit-sr/Lua-Guide/blob/main/_Lua%20guide.md)
+
 # Velo Lua guide
 
 This document provides a complete overview of every feature the Velo Lua integration provides. We will start at the basics and work our way up towards more complex features. While this guide does not expect you to know the language Lua itself, you are required to at least know basic programming concepts like variables, functions, control flow statements (`if else`, `while`, `for`), arrays and tables/dictionaries.
@@ -168,6 +170,7 @@ Velo provides a couple of special fields that you can query but are not actually
 - `Vector2`: `_length` or `_a` (float, gets the length of the vector, both do the same)
 - `CActor`: `_acceleration` and `_measuredVelocity` (`Vector2`, measured from current and previous velocity and position values)
 - `Player`: `_grappleCooldown`, `_slideCooldown` and `_surfCooldown` (float, note that these three cooldowns are handled a bit differently by the game's code and are therefore not stored directly)
+- `Slot`: `_playerName`, `_steamId`
 
 Furthermore, there is a proxy target of type `Velo` which provides a couple more fields. Type `listFields Velo` to see them all. A couple examples:
 
@@ -288,7 +291,7 @@ Note that `local` is a keyword that limits the scope of the declared variable to
 
 Whenever you call a script that does not define any callbacks, it will be executed once (blocking the game's execution as stated earlier) and then be forgotten about (clearing all global variables).
 
-If your script registers a callback function however, its state will be kept alive after finishing its initial execution, remembering all the global variables. The game continues its execution and then, whenever the callback function's event is fired, it will go back to that script and run the callback (with the stored state). Note that callback function calls are blocking, too.
+If your script registers a callback function however, its state will be kept alive after finishing its initial execution, remembering all the global variables. The game continues its execution and then, whenever the corresponding event is fired, it will go back to that script and run the callback (with the stored state). Note that callback function calls are blocking, too.
 
 You can stop a script using the `stop [name]` command and restart it using `restart [name]`, which will pass the same initial parameters to the script again. Furthermore, you can call `exit()` inside a script to stop it (do not use `stop` on itself!). Note that `exit()` will not immediately exit the script but only on the next update. You may imagine it being more of a "request stop" function. You can get a list of all currently running scripts via `listRunning`.
 
@@ -327,15 +330,19 @@ Apart from single keys, these commands can also handle combinations with SHIFT a
 
 Note that when passing single keys, these commands will not react to such key combinations; `isPressed(0x46)` will only detect F being pressed alone, but it does not react to SHIFT+F, CTRL+F or SHIFT+CTRL+F. In order to obtain modifier independent keys, Velo provides the `MOD_ANY` (`0x800`) flag; `isPressed(MOD_ANY | 0x46)` will detect any of F, SHIFT+F, CTRL+F or SHIFT+CTRL+F.
 
+You can temporarily disable all key inputs via the `disableKeyInputs [disabled]` command and all hotkeys via `disableHotkeys [disabled]`.
+
 ### Mouse inputs
 
 For mouse buttons, you can use the same 4 commands as above with the following codes:
 
 - `M_LEFT`, `M_RIGHT`, `M_MIDDLE`, `M_X1`, `M_X2`
 
-You can further query the cursor position by using `get` with the following `Velo` fields:
+You can further query the cursor position and scroll wheel state by using `get` with the following `Velo` fields:
 
-`Velo.mouse.x`, `Velo.mouse.y`
+`Velo.mouse.x`, `Velo.mouse.y`, `Velo.scrollWheel`
+
+You can temporarily disable all mouse inputs via the `disableMouseInputs [disabled]` command.
 
 ### Controller inputs
 
@@ -693,6 +700,10 @@ onPostDraw = function()
 end
 ```
 
+Use `drawTextCrop` to cut off any text that goes outside the bounding box.
+
+To measure the size of a text, use the `measureText [text] [font] [fontSize]` command.
+
 ### Layering
 
 When using `onPostDraw()`, everything we draw will always be on top of everything (including Velo's own elements). What if we want something to be drawn behind certain objects, like the tile layer? The game utilizes a layering system in order to ensure a certain draw order; the tile layer belongs to the `"Collision"` layer while the player belongs to the `"LocalPlayersLayer"`, where the latter is drawn after the former, making the player always appear in front every tile.
@@ -862,11 +873,13 @@ We store each lock as a key-value-pair into a `locks` table with the field to lo
 
 ## Executing scripts on startup
 
-Sometimes you might want a script to always be running as soon as you open up the game without having to manually type its command each time. This is where the "onStart.lua" script comes into play. This script is special as Velo will always run it once the game starts.
+Sometimes you might want a script to always be running as soon as you open up the game without having to manually type its command each time. To achieve this, all you have to do is to prefix your script's file name with "onStart". Velo will then always run these scripts once the game starts.
 
-You can use this script to run other scripts using the `run(name, args...)` function. Here, `name` is the name of the script and `args...` are the arguments to pass.
+## Executing other scripts
 
-Examples:
+In order to make your script execute another script, you can use the `run(name, args...)` function. Here, `name` is the name of the script and `args...` are the arguments to pass.
+
+This provides an alternative way to execute scripts on startup by using the provided "onStart.lua" script:
 
 ```lua
 -- onStart.lua
@@ -1082,6 +1095,10 @@ setSt(
 
 Using `defaultSt [setting]` we can restore the default value of a setting and using `defaultAllSt [module]` we can restore the default value for every setting of some module. Pass `nil` as the module to completely restore every default for every module.
 
+Sometimes, you might want your script to only temporarily change some setting and then restore it once the script stops. The usual way would be to first read the setting on startup to remember its initial value and then restore it inside the `onStop` callback. This can be pretty annoying and error-prone however and might break when multiple scripts try to change the same value or the game crashes.
+
+In order to solve these issues, Velo provides the `overrideSt [setting] [value]` and `unoverrideSt [setting]` commands. They allow you to add and remove a temporary override for a specific setting, which temporarily changes the setting's value. If called from a script, the override persists for the duration of the script's process. If called from the console, the override persists for the duration of the game's process. Once all overrides expire, the value is automatically restored back to its original value. If a setting has multiple overrides, only the most recent override is considered.
+
 ## Managing savestates
 
 You can manage savestates using the following commands:
@@ -1148,6 +1165,8 @@ onPreUpdate = function()
     setTile(1, tilePosition.x, tilePosition.y + 1)
 end
 ```
+
+You can also modify the entire tile map by use of the `resizeTileMap [width] [height]` and `MoveTileMap [x] [y]` commands.
 
 ## Console escape sequences
 
@@ -1296,11 +1315,6 @@ We use `setGhost [name] [ghostIndex]` to set the ghosts to each recording we dow
 This final section will just list a couple of miscellaneous and unrelated information that didn't really fit into this guide.
 
 - Even though it was stated that arrays in Lua are 1-based, `arg[0]` actually contains the script's name (which is not really of any use however).
-- By querying `Velo.isPlaybackRunning` and `Velo.playbackType`, you can query whether a playback is currently running and get its type. The different types are:
-    - `-1`: None
-    - `1`: Replay
-    - `2`: Replay exact
-    - `3`: Verify
-    - `4`: Capture
+- By querying `Velo.isPlaybackRunning` and `Velo.playbackType`, you can query whether a playback is currently running and get its type. The different types are listed in "VeloLib.lua", prefixed by `PB_`.
 - You can get a map's name via `getMapName [mapId]` and a player's name via `getPlayerName [steamId]`.
 - Whenever a script calls `exit()`, it will be stopped on the next return or await, no matter if it's in the main execution or in a callback.
